@@ -38,7 +38,7 @@ export function Shop({ vault, items, onClose }: Props) {
       >
         <div className="shop-head">
           <h2 id="shop-title">상점</h2>
-          <span className="shop-vault">금고 {won(vault)}</span>
+          <span className="shop-vault">내 자산 {won(vault)}</span>
           <button type="button" className="shop-close" onClick={onClose}>
             닫기
           </button>

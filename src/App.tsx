@@ -430,7 +430,7 @@ export default function App({ initial, away, firstVisit }: Props) {
     {
       id: 'worker',
       name: `일꾼 (${state.workers}명)`,
-      description: `다 자란 돈을 뽑고, 빈자리에 다시 심고, 흙이 마르면 물을 줘요. ${WORK_MS / 1000}초에 한 가지씩 해요. 월급은 ${PAY_MS / 60_000}분마다 ${won(SALARY)}이고, 고용할 때 첫 월급을 먼저 줘요. 금고가 모자라면 월급을 받을 때까지 쉬어요.`,
+      description: `다 자란 돈을 뽑고, 빈자리에 다시 심고, 흙이 마르면 물을 줘요. ${WORK_MS / 1000}초에 한 가지씩 해요. 월급은 ${PAY_MS / 60_000}분마다 ${won(SALARY)}이고, 고용할 때 첫 월급을 먼저 줘요. 자산이 모자라면 월급을 받을 때까지 쉬어요.`,
       art: art('worker') ? <img src={art('worker')} width={54} alt="" /> : <WorkerIcon />,
       price: SALARY,
       ownedLabel: '',
@@ -610,7 +610,7 @@ export default function App({ initial, away, firstVisit }: Props) {
             onClick={handleReset}
             onBlur={() => setConfirmReset(false)}
           >
-            {confirmReset ? '한 번 더 누르면 금고까지 모두 지워져요' : '처음부터 다시'}
+            {confirmReset ? '한 번 더 누르면 모은 자산까지 모두 지워져요' : '처음부터 다시'}
           </button>
         </div>
       </footer>

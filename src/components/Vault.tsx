@@ -36,7 +36,7 @@ export function Vault({ amount, harvests }: { amount: number; harvests: number }
   return (
     <header className="vault">
       <div className="vault-top">
-        <span className="vault-label">금고</span>
+        <span className="vault-label">내 자산</span>
         <span className="vault-count">수확 {harvests.toLocaleString('ko-KR')}번</span>
       </div>
       <output className="vault-amount" aria-live="polite">

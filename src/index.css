@@ -1,5 +1,5 @@
 :root {
-  /* 레이아웃: 위 금고 · 가운데 베란다 화분 · 아래 조작부, 스크롤 없는 한 화면 */
+  /* 레이아웃: 위 내 자산 · 가운데 베란다 화분 · 아래 조작부, 스크롤 없는 한 화면 */
   --wall: #d7eadf;
   --wall-line: #9fb8aa;
   --sash: #aeb8ba;
@@ -68,7 +68,7 @@ p {
   margin: 0 auto;
 }
 
-/* 금고 */
+/* 내 자산 */
 .vault {
   margin: 12px 16px 0;
   padding: 12px 16px 14px;
@@ -92,7 +92,7 @@ p {
 }
 
 .vault-label {
-  letter-spacing: 0.3em;
+  letter-spacing: 0.12em;
 }
 
 .vault-count {

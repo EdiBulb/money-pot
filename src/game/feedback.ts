@@ -110,7 +110,7 @@ export function playHarvest(stage: number): void {
   }
 }
 
-/** 1억 달성: 금고가 터지는 소리와 길게 올라가는 팡파르 */
+/** 1억 달성: 돈이 터져 나오는 소리와 길게 올라가는 팡파르 */
 export function playEnding(): void {
   tone(70, 0, 0.9, 0.5, 'sine', 32)
   noise(0, 0.5, 0.25, 'lowpass', 500)

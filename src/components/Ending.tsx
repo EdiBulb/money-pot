@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import { useEffect, useRef } from 'react'
 
-// 1억 달성 엔딩: 금고가 터지면서 지폐와 동전이 쏟아진다.
+// 1억 달성 엔딩: 화면 위 '내 자산'에서 지폐와 동전이 터져 나와 쏟아진다.
 
 interface Piece {
   x: number
@@ -93,7 +93,7 @@ function useMoneyRain() {
       return () => window.removeEventListener('resize', resize)
     }
 
-    // 금고(화면 위쪽 가운데)에서 사방으로 터져 나온다.
+    // 화면 위쪽 가운데('내 자산' 자리)에서 사방으로 터져 나온다.
     for (let i = 0; i < 110; i++) {
       const angle = rand(0, Math.PI * 2)
       const speed = rand(3, 15)
@@ -166,7 +166,7 @@ export function Ending({ took, harvests, workers, onContinue, onRestart }: Props
       <canvas ref={canvas} className="ending-rain" aria-hidden="true" />
 
       <div className="ending-body">
-        <p className="ending-kicker">금고가 터졌어요</p>
+        <p className="ending-kicker">내 자산</p>
         <motion.h2
           id="ending-title"
           className="ending-title"
