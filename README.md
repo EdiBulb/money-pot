@@ -1,0 +1,61 @@
+# 돈 화분 (Money Pot)
+
+An idle mini-game: plant a ₩100 coin in a flower pot, water it, and watch it grow into a ₩50,000 note. Pull the money out of the soil, bank it, and reach ₩100,000,000.
+
+Built with React, TypeScript, Vite and Motion. No backend: progress is saved in the browser.
+
+## How it plays
+
+- **Plant, water, wait.** Money grows ₩100 → ₩500 → ₩1,000 → ₩5,000 → ₩50,000 in two minutes, but only while the soil is wet.
+- **Pull to harvest.** Drag a note upwards and let go. Bigger notes sound and shake bigger.
+- **Expand.** Buy more pots (5 slots), garden beds (9) and farms (100). On a farm you sweep a finger across grown notes to cut them like rice.
+- **Automate.** Water tanks refill the soil; hired workers harvest, replant and water for a salary.
+- **Gestures.** Swipe sideways to move between plots, swipe down for a top-down view.
+- **Idle.** Time away is credited up to 8 hours.
+
+## Run it
+
+```bash
+npm install
+npm run dev      # local dev server
+npm run build    # type-check and build to dist/
+```
+
+## Project layout
+
+```
+src/
+  game/
+    config.ts     every tunable number (grow times, prices, salary, offline cap)
+    engine.ts     pure game logic: no React, no DOM, no clock of its own
+    feedback.ts   Web Audio sounds and vibration
+    storage.ts    localStorage save/load
+  components/     React views (pot, bed, farm, top view, shop, vault, ending)
+  art/            drop-in artwork (see below)
+  App.tsx         wires state, gestures and views together
+```
+
+`engine.ts` takes a state and returns a new one, so the whole game can be simulated without a browser. Offline progress is computed in closed form (`workInBulk`) instead of replaying every worker action, with only the last four minutes stepped exactly so the board looks right on return.
+
+## Artwork
+
+All graphics are currently drawn in code as placeholders. To replace one, put an image with the matching name in `src/art/` and rebuild. No code changes are needed; anything missing keeps its placeholder.
+
+| File name | What it is | Shape |
+| --- | --- | --- |
+| `money-100`, `money-500` | Coin, seen from the front | Square, transparent background |
+| `money-1000`, `money-5000`, `money-50000` | Banknote standing upright | Portrait 1:2, transparent background |
+| `pot` | Flower pot, seen from the side | 200:170, transparent; rim's top edge about 23% from the top |
+| `bed` | Wooden garden bed, seen from the side | 340:150, transparent; soil line about 28% from the top |
+| `veranda` | Background (sunny apartment veranda) | Any, cropped to fill and anchored to the bottom |
+| `tank`, `worker` | Shop pictures | Roughly square, transparent |
+
+Accepted formats: `.png`, `.webp`, `.jpg`, `.svg`. The pot and bed images sit in front of the money, so notes appear to rise from behind the top edge. The top-down view and the farm grid are still drawn in code.
+
+Banknote artwork should evoke the colours of Korean won (blue ₩1,000, orange-brown ₩5,000, yellow ₩50,000) without copying real notes: no real portraits, serial numbers or security features.
+
+## Deploy
+
+Pushing to `main` builds and publishes to GitHub Pages through `.github/workflows/deploy.yml`. One-time setup: repository **Settings → Pages → Source: GitHub Actions**.
+
+The share-preview tags in `index.html` assume the site lives at `https://edibulb.github.io/money-pot/`. Update them if the repository name changes.
