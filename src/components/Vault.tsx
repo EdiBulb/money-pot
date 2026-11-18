@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { GOAL } from '../game/config'
+import { goalLabel } from '../game/config'
 
 const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
 
@@ -27,11 +27,19 @@ function useCountUp(target: number, ms = 450): number {
   return shown
 }
 
-export function Vault({ amount, harvests }: { amount: number; harvests: number }) {
+interface Props {
+  amount: number
+  harvests: number
+  /** 지금 도전 중인 목표 금액 */
+  goal: number
+}
+
+export function Vault({ amount, harvests, goal }: Props) {
   const shown = useCountUp(amount)
-  const ratio = Math.min(1, amount / GOAL)
+  const label = goalLabel(goal)
+  const ratio = Math.min(1, amount / goal)
   const percent = (ratio * 100).toFixed(ratio < 0.01 ? 4 : 2)
-  const left = Math.max(0, GOAL - amount)
+  const left = Math.max(0, goal - amount)
 
   return (
     <header className="vault">
@@ -45,7 +53,7 @@ export function Vault({ amount, harvests }: { amount: number; harvests: number }
       <div
         className="vault-bar"
         role="progressbar"
-        aria-label="1억 모으기 진행률"
+        aria-label={`${label} 모으기 진행률`}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Number(percent)}
@@ -53,7 +61,7 @@ export function Vault({ amount, harvests }: { amount: number; harvests: number }
         <div className="vault-bar-fill" style={{ width: `${ratio * 100}%` }} />
       </div>
       <p className="vault-goal">
-        {left === 0 ? '1억 달성!' : `1억까지 ${won(left)} 남음 · ${percent}%`}
+        {left === 0 ? `${label} 달성!` : `${label}까지 ${won(left)} 남음 · ${percent}%`}
       </p>
     </header>
   )

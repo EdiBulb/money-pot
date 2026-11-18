@@ -30,6 +30,7 @@ import {
   hasGrown,
   hire,
   markGoal,
+  nextGoal,
   msToNextGrowth,
   newGame,
   plant,
@@ -37,6 +38,7 @@ import {
   plantCount,
   plotPrice,
   reachedGoal,
+  startNextGoal,
   refillTank,
   tankCap,
   tankPrice,
@@ -448,7 +450,7 @@ export default function App({ initial, away, firstVisit }: Props) {
 
   return (
     <motion.div className="app" animate={shake} onPointerDown={unlockAudio}>
-      <Vault amount={state.vault} harvests={state.harvests} />
+      <Vault amount={state.vault} harvests={state.harvests} goal={state.goal} />
 
       <main
         className="scene"
@@ -639,7 +641,7 @@ export default function App({ initial, away, firstVisit }: Props) {
               <li>
                 화분이 여러 개면 <b>옆으로 밀어서</b> 넘겨요.
               </li>
-              <li>1억을 모으면 끝이에요.</li>
+              <li>1억을 모으면 10억에 도전할 수 있어요.</li>
             </ul>
             <button type="button" className="btn btn-plant" onClick={endGuide}>
               시작하기
@@ -650,9 +652,15 @@ export default function App({ initial, away, firstVisit }: Props) {
 
       {ending && (
         <Ending
+          goal={state.goal}
+          next={nextGoal(state)}
           took={duration((state.goalAt ?? Date.now()) - state.startedAt)}
           harvests={state.harvests}
           workers={state.workers}
+          onNext={() => {
+            setEnding(false)
+            commit(startNextGoal(stateRef.current))
+          }}
           onContinue={() => setEnding(false)}
           onRestart={() => {
             setEnding(false)

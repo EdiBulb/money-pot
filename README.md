@@ -1,6 +1,6 @@
 # 돈 화분 (Money Pot)
 
-An idle mini-game: plant a ₩100 coin in a flower pot, water it, and watch it grow into a ₩50,000 note. Pull the money out of the soil, bank it, and reach ₩100,000,000.
+An idle mini-game: plant a ₩100 coin in a flower pot, water it, and watch it grow into a ₩50,000 note. Pull the money out of the soil, bank it, and reach ₩100,000,000, then carry on to ₩1,000,000,000.
 
 Built with React, TypeScript, Vite and Motion. No backend: progress is saved in the browser.
 

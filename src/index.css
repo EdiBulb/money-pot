@@ -842,6 +842,11 @@ p {
   width: 100%;
 }
 
+.ending-note {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
 .btn-gold {
   background: var(--gold);
   color: var(--safe-edge);

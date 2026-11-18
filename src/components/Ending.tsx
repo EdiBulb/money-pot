@@ -1,7 +1,8 @@
 import { motion } from 'motion/react'
+import { goalLabel } from '../game/config'
 import { useEffect, useRef } from 'react'
 
-// 1억 달성 엔딩: 화면 위 '내 자산'에서 지폐와 동전이 터져 나와 쏟아진다.
+// 목표(1억, 10억) 달성 엔딩: 화면 위 '내 자산'에서 지폐와 동전이 터져 나와 쏟아진다.
 
 interface Piece {
   x: number
@@ -135,15 +136,20 @@ function useMoneyRain() {
 }
 
 interface Props {
-  /** 시작부터 1억까지 걸린 시간(글자로) */
+  /** 달성한 목표 금액 */
+  goal: number
+  /** 다음에 도전할 목표. 마지막이면 null */
+  next: number | null
+  /** 처음 시작부터 걸린 시간(글자로) */
   took: string
   harvests: number
   workers: number
+  onNext: () => void
   onContinue: () => void
   onRestart: () => void
 }
 
-export function Ending({ took, harvests, workers, onContinue, onRestart }: Props) {
+export function Ending({ goal, next, took, harvests, workers, onNext, onContinue, onRestart }: Props) {
   const canvas = useMoneyRain()
 
   return (
@@ -174,9 +180,9 @@ export function Ending({ took, harvests, workers, onContinue, onRestart }: Props
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 260, damping: 11, delay: 0.15 }}
         >
-          1억
+          {goalLabel(goal)}
         </motion.h2>
-        <p className="ending-sub">100,000,000원을 모았어요</p>
+        <p className="ending-sub">{goal.toLocaleString('ko-KR')}원을 모았어요</p>
 
         <dl className="ending-stats">
           <div>
@@ -194,9 +200,18 @@ export function Ending({ took, harvests, workers, onContinue, onRestart }: Props
         </dl>
 
         <div className="ending-actions">
-          <button type="button" className="btn btn-gold" onClick={onContinue}>
-            계속 키우기
-          </button>
+          {next !== null ? (
+            <>
+              <button type="button" className="btn btn-gold" onClick={onNext}>
+                {goalLabel(next)} 모으기 도전
+              </button>
+              <p className="ending-note">모은 돈과 화분, 일꾼은 그대로 이어져요.</p>
+            </>
+          ) : (
+            <button type="button" className="btn btn-gold" onClick={onContinue}>
+              계속 키우기
+            </button>
+          )}
           <button type="button" className="ending-restart" onClick={onRestart}>
             처음부터 다시
           </button>

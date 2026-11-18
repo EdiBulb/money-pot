@@ -1,7 +1,7 @@
 import {
   DENOMS,
   EXACT_TAIL_MS,
-  GOAL,
+  GOALS,
   GROW_MS,
   MAX_STAGE,
   OFFLINE_MAX_MS,
@@ -55,6 +55,8 @@ export interface GameState {
   /** 이 판을 시작한 시각과 1억을 처음 넘긴 시각(아직이면 null). 엔딩은 한 판에 한 번만 나온다. */
   startedAt: number
   goalAt: number | null
+  /** 지금 도전 중인 목표 금액 */
+  goal: number
   /** 저장할 때 돈의 단계가 몇 개였는지. 단계가 바뀐 옛 저장본을 알아보는 데 쓴다. */
   money: number
   /** 마지막으로 계산한 시각. 다시 접속했을 때 지난 시간을 한꺼번에 반영한다. */
@@ -88,6 +90,7 @@ export function newGame(now: number): GameState {
     nextId: 1,
     startedAt: now,
     goalAt: null,
+    goal: GOALS[0],
     money: DENOMS.length,
     lastSeen: now,
   }
@@ -428,11 +431,23 @@ export function refillTank(state: GameState): GameState {
 
 // ── 목표 ───────────────────────────────────────────────
 
-export const reachedGoal = (state: GameState) => state.goalAt === null && state.vault >= GOAL
+export const reachedGoal = (state: GameState) => state.goalAt === null && state.vault >= state.goal
 
 /** 1억을 처음 넘긴 순간을 적어 둔다. */
 export function markGoal(state: GameState, now: number): GameState {
   return reachedGoal(state) ? { ...state, goalAt: now } : state
+}
+
+/** 지금 목표 다음의 목표. 마지막 목표면 null. */
+export function nextGoal(state: GameState): number | null {
+  const i = GOALS.findIndex((g) => g === state.goal)
+  return i >= 0 && i < GOALS.length - 1 ? GOALS[i + 1] : null
+}
+
+/** 다음 목표에 도전한다. 모은 돈과 화분은 그대로 이어 간다. */
+export function startNextGoal(state: GameState): GameState {
+  const next = nextGoal(state)
+  return next === null ? state : { ...state, goal: next, goalAt: null }
 }
 
 // ── 화면에 보여 줄 값 ─────────────────────────────────────
@@ -491,6 +506,7 @@ export function isGameState(v: unknown): v is GameState {
     typeof s.nextId === 'number' &&
     typeof s.startedAt === 'number' &&
     (s.goalAt === null || typeof s.goalAt === 'number') &&
+    typeof s.goal === 'number' &&
     s.money === DENOMS.length &&
     Array.isArray(s.plots) &&
     s.plots.length >= 1 &&
@@ -504,6 +520,7 @@ export function isGameState(v: unknown): v is GameState {
  * - 화분만 여러 개이던 때: pots, tank(없으면 null)
  * - 일꾼이 없던 때: workers 등이 없음
  * - 엔딩이 없던 때: startedAt, goalAt이 없음
+ * - 10억 도전이 없던 때: goal이 없음(1억이 목표였다)
  * - 만 원권이 없던 때(money 없음): 단계가 5개라 4번째 단계가 5만 원이었다
  */
 export function restore(v: unknown): GameState | null {
@@ -518,6 +535,7 @@ export function restore(v: unknown): GameState | null {
     // 시작 시각을 적기 전의 저장본은 마지막으로 본 시각부터 센다.
     startedAt: typeof raw.lastSeen === 'number' ? raw.lastSeen : 0,
     goalAt: null,
+    goal: GOALS[0],
     ...raw,
   }
 

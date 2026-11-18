@@ -56,7 +56,14 @@ export const EXACT_TAIL_MS = 4 * 60 * 1000
 
 export const SEED_COST = 100
 export const START_VAULT = 100
-export const GOAL = 100_000_000
+/** 차례로 도전하는 목표. 1억을 모으면 10억에 도전할 수 있다. */
+export const GOALS = [100_000_000, 1_000_000_000] as const
+
+/** 1억, 10억처럼 짧게 읽는 금액 */
+export function goalLabel(n: number): string {
+  const eok = n / 100_000_000
+  return Number.isInteger(eok) ? `${eok.toLocaleString('ko-KR')}억` : `${n.toLocaleString('ko-KR')}원`
+}
 
 /** 이만큼 위로 끌어올린 뒤 놓으면 뽑힌다(px, 손가락 이동 거리 기준). */
 export const PULL_THRESHOLD = 90
