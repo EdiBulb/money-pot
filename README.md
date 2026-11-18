@@ -47,11 +47,13 @@ The plots and money are AI-generated photos, shot from above at about 60 degrees
 | `farm` | Square wooden field plot | In use (also used for the garden bed) |
 | `bed` | Garden bed | Optional; the farm photo is used until one exists |
 | `money-1000`, `money-5000`, `money-10000`, `money-50000` | Banknote rolled into a cylinder, standing upright | In use |
-| `money-100`, `money-500` | Coin standing on its edge | Drawn in code for now |
+| `money-100`, `money-500` | Coin | In use (rendered from the code drawing; replace with photos later) |
 | `veranda` | Floor background | Drawn in code (concrete) for now |
 | `tank`, `worker` | Shop pictures | Drawn in code for now |
 
 Replacing `pot`, `bed` or `farm` means re-measuring the soil area in `src/components/plotGeometry.ts`, since money is placed by fractions of the photo.
+
+Coins and notes are raster images on purpose: Chrome's forced dark mode darkens shapes drawn in code but leaves images alone.
 
 Banknote artwork follows the Bank of Korea's design-use rules: no portraits are drawn, and the portrait area is left as a plain oval.
 

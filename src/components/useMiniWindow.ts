@@ -68,5 +68,16 @@ export function useMiniWindow() {
   // 게임을 닫으면 작은 창도 닫는다.
   useEffect(() => () => win?.close(), [win])
 
+  // 작은 창은 게임 탭이 있어야 떠 있을 수 있다. 작은 창이 떠 있을 때 탭을 닫으려 하면 한 번 묻는다.
+  useEffect(() => {
+    if (!win) return
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [win])
+
   return { win, open, close, error }
 }

@@ -30,7 +30,7 @@
   --font-display: 'Black Han Sans', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --font-body: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
 
-  color-scheme: light;
+  color-scheme: only light;
 }
 
 * {
