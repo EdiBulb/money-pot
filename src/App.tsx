@@ -1,7 +1,10 @@
 import { motion, useAnimationControls } from 'motion/react'
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { art } from './art'
+import { createPortal } from 'react-dom'
 import { Ending } from './components/Ending'
+import { MiniVault } from './components/MiniVault'
+import { pipSupported, useMiniWindow } from './components/useMiniWindow'
 import { FarmView } from './components/FarmView'
 import { PlotIcon, PlotView, type Gain } from './components/PlotView'
 import { TankArt, WorkerIcon } from './components/ShopArt'
@@ -122,6 +125,7 @@ export default function App({ initial, away, firstVisit }: Props) {
   }
   const shake = useAnimationControls()
 
+  const mini = useMiniWindow()
   const stateRef = useRef(state)
   const lastSave = useRef(0)
   const stages = useRef(new Map<number, { stage: number; plot: number; slot: number }>())
@@ -133,6 +137,15 @@ export default function App({ initial, away, firstVisit }: Props) {
     const id = setInterval(() => setState((s) => advance(s, Date.now())), 100)
     return () => clearInterval(id)
   }, [])
+
+  // 작은 창이 떠 있으면 그 창의 타이머로도 시간을 흘린다.
+  // 게임 탭이 가려지면 브라우저가 그 탭의 타이머를 늦추지만, 작은 창은 보이고 있으니 늦추지 않는다.
+  useEffect(() => {
+    const win = mini.win
+    if (!win) return
+    const id = win.setInterval(() => setState((s) => advance(s, Date.now())), 500)
+    return () => win.clearInterval(id)
+  }, [mini.win])
 
   // 저장: 1초에 한 번, 그리고 화면을 떠날 때.
   useEffect(() => {
@@ -450,7 +463,20 @@ export default function App({ initial, away, firstVisit }: Props) {
 
   return (
     <motion.div className="app" animate={shake} onPointerDown={unlockAudio}>
-      <Vault amount={state.vault} harvests={state.harvests} goal={state.goal} />
+      <Vault
+        amount={state.vault}
+        harvests={state.harvests}
+        goal={state.goal}
+        popOut={
+          pipSupported ? { open: !!mini.win, onToggle: () => (mini.win ? mini.close() : void mini.open()) } : undefined
+        }
+      />
+      {mini.error && (
+        <p className="pop-out-error" role="status">
+          여기서는 작은 창을 띄울 수 없어요. 크롬이나 엣지에서 게임 주소를 직접 열어 주세요.
+        </p>
+      )}
+      {mini.win && createPortal(<MiniVault amount={state.vault} goal={state.goal} />, mini.win.document.body)}
 
       <main
         className="scene"

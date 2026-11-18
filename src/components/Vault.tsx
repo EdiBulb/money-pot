@@ -32,9 +32,11 @@ interface Props {
   harvests: number
   /** 지금 도전 중인 목표 금액 */
   goal: number
+  /** 작은 창 버튼. 지원하지 않는 브라우저에서는 넘기지 않는다. */
+  popOut?: { open: boolean; onToggle: () => void }
 }
 
-export function Vault({ amount, harvests, goal }: Props) {
+export function Vault({ amount, harvests, goal, popOut }: Props) {
   const shown = useCountUp(amount)
   const label = goalLabel(goal)
   const ratio = Math.min(1, amount / goal)
@@ -46,6 +48,11 @@ export function Vault({ amount, harvests, goal }: Props) {
       <div className="vault-top">
         <span className="vault-label">내 자산</span>
         <span className="vault-count">수확 {harvests.toLocaleString('ko-KR')}번</span>
+        {popOut && (
+          <button type="button" className="pop-out" aria-pressed={popOut.open} onClick={popOut.onToggle}>
+            {popOut.open ? '작은 창 닫기' : '작은 창으로 띄우기'}
+          </button>
+        )}
       </div>
       <output className="vault-amount" aria-live="polite">
         {won(shown)}
