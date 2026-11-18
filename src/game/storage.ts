@@ -1,7 +1,7 @@
 import { restore, type GameState } from './engine'
 
-const KEY = 'money-pot/v4'
-const OLD_KEYS = ['money-pot/v3', 'money-pot/v2']
+const KEY = 'money-pot/v5'
+const OLD_KEYS = ['money-pot/v4', 'money-pot/v3', 'money-pot/v2']
 
 // 저장소는 없거나 막혀 있을 수 있다. 실패해도 게임은 그대로 돌아가야 한다.
 export function loadGame(): GameState | null {

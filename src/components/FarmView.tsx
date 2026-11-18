@@ -1,9 +1,11 @@
-import { useRef, type PointerEvent } from 'react'
+import { useRef, type CSSProperties, type PointerEvent } from 'react'
 import { DENOMS, MAX_STAGE, SWIPE_THRESHOLD } from '../game/config'
 import type { Plot } from '../game/engine'
+import { Money } from './Money'
+import { dryness, geometryOf, soilClip } from './plotGeometry'
 
-// 농장은 100칸짜리 밭을 위에서 내려다본다.
-// 하나씩 당겨 뽑는 대신, 다 자란 돈(5만 원) 위를 손가락으로 훑으면 벼 베듯 거둔다.
+// 농장은 100칸이라 돈을 하나씩 당겨 뽑지 않는다.
+// 다 자란 돈(5만 원) 위를 손가락으로 훑으면 벼 베듯 거둔다.
 
 interface Props {
   plot: Plot
@@ -14,6 +16,7 @@ interface Props {
 
 export function FarmView({ plot, wet, onHarvest, onSwipe }: Props) {
   const stroke = useRef<{ x: number; y: number; cut: boolean } | null>(null)
+  const g = geometryOf('farm')
 
   /** 손가락 아래에 다 자란 돈이 있으면 거둔다. */
   const cutAt = (x: number, y: number) => {
@@ -48,26 +51,41 @@ export function FarmView({ plot, wet, onHarvest, onSwipe }: Props) {
   }
 
   return (
-    <div className="farm">
-      <div
-        className="farm-field"
-        onPointerDown={onDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        onPointerCancel={() => (stroke.current = null)}
-      >
-        <div className="farm-wet" style={{ opacity: wet }} aria-hidden="true" />
-        {plot.slots.map((p, i) => (
+    <div
+      className="plot plot-farm"
+      style={{ aspectRatio: g.aspect }}
+      onPointerDown={onDown}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerCancel={() => (stroke.current = null)}
+    >
+      <img className="plot-img" src={g.src} alt="" draggable={false} />
+      <div className="dry" style={{ opacity: dryness(wet) * 0.6, ...soilClip(g.soil) }} aria-hidden="true" />
+
+      {g.spots.map((spot, i) => {
+        const p = plot.slots[i]
+        const style: CSSProperties = {
+          left: `${spot.x * 100}%`,
+          top: `${spot.y * 100}%`,
+          width: `${g.money * spot.scale * 100}%`,
+          zIndex: Math.round(spot.y * 100),
+        }
+        return (
           <div
             key={i}
             data-slot={i}
-            className="cell"
+            className={`cell${p?.stage === MAX_STAGE ? ' cell-ready' : ''}`}
+            style={style}
             aria-label={p ? `${DENOMS[p.stage].toLocaleString('ko-KR')}원` : '빈자리'}
           >
-            {p && <span key={`${p.id}-${p.stage}`} className={`tok tok-${p.stage}`} />}
+            {p && (
+              <span key={`${p.id}-${p.stage}`} className="cell-money">
+                <Money stage={p.stage} fluid />
+              </span>
+            )}
           </div>
-        ))}
-      </div>
+        )
+      })}
     </div>
   )
 }

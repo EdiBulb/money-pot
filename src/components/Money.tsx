@@ -13,7 +13,8 @@ interface BillLook {
 const BILLS: Record<number, BillLook> = {
   1000: { base: '#86add9', light: '#cfe1f3', dark: '#2c5a92', width: 64 },
   5000: { base: '#dd9f72', light: '#f5dcc6', dark: '#8c4721', width: 68 },
-  50000: { base: '#efc95c', light: '#fbecb4', dark: '#86600c', width: 74 },
+  10000: { base: '#8ec79b', light: '#d6eedb', dark: '#2d6b45', width: 71 },
+  50000: { base: '#efc95c', light: '#fbecb4', dark: '#86600c', width: 76 },
 }
 
 function Coin({ value }: { value: number }) {
@@ -102,23 +103,33 @@ function Bill({ value }: { value: number }) {
   )
 }
 
-export function Money({ stage }: { stage: number }) {
+/**
+ * fluid: 부모 너비에 맞춰 그린다(화분·밭 위에 꽂을 때). 동전은 지폐보다 작게 보이도록 부모 너비의 일부만 쓴다.
+ */
+export function Money({ stage, fluid = false }: { stage: number; fluid?: boolean }) {
   const value = DENOMS[stage]
   const image = art(`money-${value}` as ArtName)
+  const coin = value <= 500
+  const fluidWidth = coin ? (value === 100 ? '82%' : '96%') : '100%'
+
   if (image) {
-    // 넣어 둔 이미지가 있으면 그걸 쓴다. 크기는 코드로 그린 그림과 같게 맞춘다.
-    const width = value === 100 ? 58 : value === 500 ? 74 : BILLS[value].width
-    const height = value <= 500 ? width : width * 2
+    const width = coin ? (value === 100 ? 58 : 74) : BILLS[value].width
     return (
       <img
         src={image}
-        width={width}
-        height={height}
+        width={fluid ? undefined : width}
         alt={`${value.toLocaleString('ko-KR')}원`}
         draggable={false}
-        style={{ display: 'block', objectFit: 'contain' }}
+        style={{ display: 'block', width: fluid ? fluidWidth : width, height: 'auto', margin: '0 auto' }}
       />
     )
   }
-  return value <= 500 ? <Coin value={value} /> : <Bill value={value} />
+  const drawn = coin ? <Coin value={value} /> : <Bill value={value} />
+  return fluid ? (
+    <span className="money-fluid" style={{ width: fluidWidth }}>
+      {drawn}
+    </span>
+  ) : (
+    drawn
+  )
 }

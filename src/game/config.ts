@@ -1,8 +1,8 @@
 /** 돈이 자라는 단계. 심는 순간 100원이고 끝까지 키우면 5만 원이 된다. */
-export const DENOMS = [100, 500, 1000, 5000, 50000] as const
+export const DENOMS = [100, 500, 1000, 5000, 10000, 50000] as const
 
 /** 각 단계에서 다음 단계로 자라는 데 걸리는 시간(ms). 다 자라는 데 2분. */
-export const GROW_MS = [10_000, 20_000, 30_000, 60_000] as const
+export const GROW_MS = [10_000, 15_000, 20_000, 30_000, 45_000] as const
 
 export const MAX_STAGE = DENOMS.length - 1
 

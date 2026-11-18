@@ -55,6 +55,8 @@ export interface GameState {
   /** 이 판을 시작한 시각과 1억을 처음 넘긴 시각(아직이면 null). 엔딩은 한 판에 한 번만 나온다. */
   startedAt: number
   goalAt: number | null
+  /** 저장할 때 돈의 단계가 몇 개였는지. 단계가 바뀐 옛 저장본을 알아보는 데 쓴다. */
+  money: number
   /** 마지막으로 계산한 시각. 다시 접속했을 때 지난 시간을 한꺼번에 반영한다. */
   lastSeen: number
 }
@@ -86,6 +88,7 @@ export function newGame(now: number): GameState {
     nextId: 1,
     startedAt: now,
     goalAt: null,
+    money: DENOMS.length,
     lastSeen: now,
   }
 }
@@ -488,6 +491,7 @@ export function isGameState(v: unknown): v is GameState {
     typeof s.nextId === 'number' &&
     typeof s.startedAt === 'number' &&
     (s.goalAt === null || typeof s.goalAt === 'number') &&
+    s.money === DENOMS.length &&
     Array.isArray(s.plots) &&
     s.plots.length >= 1 &&
     s.plots.every(isPlot)
@@ -500,6 +504,7 @@ export function isGameState(v: unknown): v is GameState {
  * - 화분만 여러 개이던 때: pots, tank(없으면 null)
  * - 일꾼이 없던 때: workers 등이 없음
  * - 엔딩이 없던 때: startedAt, goalAt이 없음
+ * - 만 원권이 없던 때(money 없음): 단계가 5개라 4번째 단계가 5만 원이었다
  */
 export function restore(v: unknown): GameState | null {
   if (isGameState(v)) return v
@@ -525,5 +530,25 @@ export function restore(v: unknown): GameState | null {
       tank: typeof raw.tank === 'number' ? raw.tank : 0,
     }
   }
+  if (upgraded.money !== DENOMS.length) {
+    upgraded = { ...upgraded, plots: addTenThousand(upgraded.plots), money: DENOMS.length }
+  }
   return isGameState(upgraded) ? upgraded : null
+}
+
+/**
+ * 만 원권이 생기기 전 저장본을 옮긴다. 5만 원(옛 4단계)은 새 5단계로 올리고,
+ * 나머지는 단계를 그대로 두되 새 성장 시간을 넘지 않게 자른다.
+ */
+function addTenThousand(plots: unknown): unknown {
+  if (!Array.isArray(plots)) return plots
+  return plots.map((plot) => {
+    if (typeof plot !== 'object' || plot === null || !Array.isArray(plot.slots)) return plot
+    const slots = plot.slots.map((p: unknown) => {
+      if (!isPlant(p)) return p
+      if (p.stage >= 4) return { ...p, stage: MAX_STAGE, progress: 0 }
+      return { ...p, progress: Math.min(p.progress, GROW_MS[p.stage] - 1) }
+    })
+    return { ...plot, slots }
+  })
 }

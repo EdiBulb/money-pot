@@ -3,10 +3,9 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { art } from './art'
 import { Ending } from './components/Ending'
 import { FarmView } from './components/FarmView'
-import { PlotView, type Gain } from './components/PlotView'
-import { BedIcon, FarmIcon, PotIcon, TankArt, WorkerIcon } from './components/Pot'
+import { PlotIcon, PlotView, type Gain } from './components/PlotView'
+import { TankArt, WorkerIcon } from './components/ShopArt'
 import { Shop, type ShopItem } from './components/Shop'
-import { TopView } from './components/TopView'
 import { Vault } from './components/Vault'
 import {
   DENOMS,
@@ -95,8 +94,7 @@ export default function App({ initial, away, firstVisit }: Props) {
   // 1분 넘게 비웠다 돌아왔을 때만 보여 준다.
   const [awayNote, setAwayNote] = useState(away && away.ms >= 60_000 ? away : null)
   const [active, setActive] = useState(0) // 지금 보고 있는 화분·텃밭
-  const [view, setView] = useState<'side' | 'top'>('side') // 옆에서 보기 / 위에서 내려다보기
-  const [slideFrom, setSlideFrom] = useState({ x: 1, y: 0 }) // 새 화면이 들어오는 방향
+  const [slideFrom, setSlideFrom] = useState<1 | -1>(1) // 새 화면이 들어오는 방향
   const [gains, setGains] = useState<Gain[]>([])
   const [dropKey, setDropKey] = useState(0)
   const [shopOpen, setShopOpen] = useState(false)
@@ -216,7 +214,6 @@ export default function App({ initial, away, firstVisit }: Props) {
 
   const restart = () => {
     setActive(0)
-    setView('side')
     setGains([])
     commit(newGame(Date.now()))
   }
@@ -225,26 +222,18 @@ export default function App({ initial, away, firstVisit }: Props) {
   const go = (direction: 1 | -1) => {
     const next = active + direction
     if (next < 0 || next >= stateRef.current.plots.length) return
-    setSlideFrom({ x: direction, y: 0 })
+    setSlideFrom(direction)
     setActive(next)
     vibrate(6)
   }
 
-  /** 아래로 밀면 위에서 내려다보고, 위로 밀면 다시 옆에서 본다. */
-  const look = (next: 'side' | 'top') => {
-    if (next === view) return
-    setSlideFrom({ x: 0, y: next === 'top' ? -1 : 1 })
-    setView(next)
-    vibrate(6)
-  }
+
 
   // 데스크탑에서는 방향키로도 넘긴다.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') go(1)
       if (e.key === 'ArrowLeft') go(-1)
-      if (e.key === 'ArrowDown') look('top')
-      if (e.key === 'ArrowUp') look('side')
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -265,7 +254,6 @@ export default function App({ initial, away, firstVisit }: Props) {
     const dx = e.clientX - start.x
     const dy = e.clientY - start.y
     if (Math.abs(dx) >= SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy) * 1.2) go(dx < 0 ? 1 : -1)
-    else if (Math.abs(dy) >= SWIPE_THRESHOLD && Math.abs(dy) > Math.abs(dx) * 1.2) look(dy > 0 ? 'top' : 'side')
   }
 
   const handlePlant = () => {
@@ -322,7 +310,7 @@ export default function App({ initial, away, firstVisit }: Props) {
     playPlant()
     vibrate(20)
     commit(next)
-    setSlideFrom({ x: 1, y: 0 })
+    setSlideFrom(1)
     setActive(next.plots.length - 1)
     setShopOpen(false)
   }
@@ -375,8 +363,7 @@ export default function App({ initial, away, firstVisit }: Props) {
   let status: string
   if (count === 0) status = `${kind.name}이 비었어요. ${won(SEED_COST)}을 심어 보세요.`
   else if (farm && grownCount > 0) status = `다 자란 돈 ${grownCount}개. 손가락으로 훑어서 거두세요.`
-  else if (wait === null)
-    status = view === 'top' ? '다 자랐어요. 위로 밀어 옆에서 보고 뽑으세요.' : '다 자랐어요. 위로 쭉 당겨서 뽑으세요.'
+  else if (wait === null) status = '다 자랐어요. 위로 쭉 당겨서 뽑으세요.'
   else if (state.water < 1) status = '흙이 말랐어요. 물을 줘야 자라요.'
   else status = `다음 성장까지 ${clock(wait)}${grownCount ? ` · 다 자란 돈 ${grownCount}개` : ''}`
 
@@ -408,7 +395,7 @@ export default function App({ initial, away, firstVisit }: Props) {
       id: 'pot',
       name: `화분 (${pots}개)`,
       description: `돈을 ${PLOTS.pot.slots}개 심을 수 있어요.`,
-      art: <PotIcon />,
+      art: <PlotIcon kind="pot" />,
       price: plotPrice(state, 'pot'),
       ownedLabel: '',
       onBuy: () => handleBuyPlot('pot'),
@@ -417,7 +404,7 @@ export default function App({ initial, away, firstVisit }: Props) {
       id: 'bed',
       name: `텃밭 (${beds}개)`,
       description: `돈을 ${PLOTS.bed.slots}개 심을 수 있어요. 물은 화분 ${PLOTS.bed.thirst}개만큼 써요.`,
-      art: <BedIcon />,
+      art: <PlotIcon kind="bed" />,
       price: plotPrice(state, 'bed'),
       ownedLabel: '',
       onBuy: () => handleBuyPlot('bed'),
@@ -426,7 +413,7 @@ export default function App({ initial, away, firstVisit }: Props) {
       id: 'farm',
       name: `농장 (${farms}개)`,
       description: `돈을 ${PLOTS.farm.slots}개 심을 수 있어요. 한 번에 모두 심고, 다 자란 돈은 손가락으로 훑어서 거둬요. 물은 화분 ${PLOTS.farm.thirst}개만큼 써요.`,
-      art: <FarmIcon />,
+      art: <PlotIcon kind="farm" />,
       price: plotPrice(state, 'farm'),
       ownedLabel: '',
       onBuy: () => handleBuyPlot('farm'),
@@ -472,14 +459,7 @@ export default function App({ initial, away, firstVisit }: Props) {
         {backdrop ? (
           <img className="backdrop" src={backdrop} alt="" draggable={false} />
         ) : (
-          <>
-            <div className="window" aria-hidden="true">
-              <span className="cloud cloud-a" />
-              <span className="cloud cloud-b" />
-            </div>
-            <div className="floor" aria-hidden="true" />
-            <div className="sunbeam" aria-hidden="true" />
-          </>
+          <div className="concrete" aria-hidden="true" />
         )}
 
         <div className="owned">
@@ -521,7 +501,7 @@ export default function App({ initial, away, firstVisit }: Props) {
           상점
         </button>
 
-        {guideStep === 'pull' && !farm && view === 'side' && (
+        {guideStep === 'pull' && !farm && (
           <p className="pull-cue" aria-hidden="true">
             <span className="pull-arrow" />
             위로 당기기
@@ -529,16 +509,14 @@ export default function App({ initial, away, firstVisit }: Props) {
         )}
 
         <motion.div
-          key={`${index}-${farm ? 'farm' : view}`}
+          key={index}
           className="plot-stage"
-          initial={reducedMotion() ? false : { x: slideFrom.x * 160, y: slideFrom.y * 120, opacity: 0 }}
-          animate={{ x: 0, y: 0, opacity: 1 }}
+          initial={reducedMotion() ? false : { x: slideFrom * 160, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 520, damping: 38 }}
         >
           {farm ? (
             <FarmView plot={plot} wet={wet} onHarvest={handleHarvest} onSwipe={go} />
-          ) : view === 'top' ? (
-            <TopView plot={plot} wet={wet} />
           ) : (
             <PlotView
               plot={plot}
@@ -547,7 +525,6 @@ export default function App({ initial, away, firstVisit }: Props) {
               dropKey={dropKey}
               onHarvest={handleHarvest}
               onSwipe={go}
-              onLookDown={() => look('top')}
               onGainDone={(id) => setGains((all) => all.filter((g) => g.id !== id))}
             />
           )}
@@ -658,9 +635,6 @@ export default function App({ initial, away, firstVisit }: Props) {
               <li>번 돈으로 화분 하나에 5개까지 심어요.</li>
               <li>
                 <b>상점</b>에서 화분, 물탱크, 일꾼을 사요. 일꾼은 알아서 뽑고, 심고, 물을 줘요.
-              </li>
-              <li>
-                화면을 <b>아래로 밀면</b> 화분을 위에서 봐요.
               </li>
               <li>
                 화분이 여러 개면 <b>옆으로 밀어서</b> 넘겨요.

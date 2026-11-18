@@ -99,11 +99,11 @@ export function playHarvest(stage: number): void {
 
   // 지폐: 종이 스치는 소리 + 단위만큼 길어지는 상승음
   noise(0.03, 0.22, 0.12, 'highpass', 3200)
-  const notes = stage === 2 ? 3 : stage === 3 ? 4 : 6
+  const notes = [0, 0, 3, 4, 5, 6][stage] ?? 6
   for (let i = 0; i < notes; i++) {
     tone(ARPEGGIO[i], 0.06 + i * 0.07, 0.3, 0.13, 'triangle')
   }
-  if (stage === 4) {
+  if (stage === 5) {
     tone(65, 0, 0.5, 0.4, 'sine', 40) // 묵직한 한 방
     tone(2093, 0.5, 0.6, 0.08)
     tone(2637, 0.56, 0.6, 0.07)
@@ -125,6 +125,7 @@ const HAPTICS: number[][] = [
   [22],
   [20, 30, 30],
   [30, 30, 40, 30, 50],
+  [35, 30, 40, 30, 55, 40, 80],
   [40, 30, 40, 30, 60, 40, 140],
 ]
 
@@ -143,6 +144,6 @@ export function harvestHaptic(stage: number): boolean {
 
 /** 화면 흔들림 세기(px). 진동이 안 되는 기기에서는 이걸로 손맛을 대신한다. */
 export function shakeAmount(stage: number, vibrated: boolean): number {
-  const base = [0, 2, 4, 7, 12][stage] ?? 0
+  const base = [0, 2, 4, 6, 8, 12][stage] ?? 0
   return vibrated ? base * 0.6 : base + 2
 }

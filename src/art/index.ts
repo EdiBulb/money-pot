@@ -2,8 +2,8 @@
 // 이 폴더에 정해진 이름의 이미지(png, webp, jpg, svg)를 넣으면 코드를 고치지 않아도
 // 코드로 그린 임시 그림 대신 그 이미지가 쓰인다. 이름과 크기는 README의 "Artwork" 참고.
 //
-//   money-100, money-500, money-1000, money-5000, money-50000   옆에서 본 돈
-//   pot, bed                                                    화분, 텃밭
+//   money-100, money-500, money-1000, money-5000, money-10000, money-50000   돈
+//   pot, bed, farm                                              화분, 텃밭, 농장 (위에서 비스듬히 본 사진)
 //   veranda                                                     배경
 //   tank, worker                                                상점 그림
 
@@ -18,9 +18,10 @@ const byName = new Map(
 )
 
 export type ArtName =
-  | `money-${100 | 500 | 1000 | 5000 | 50000}`
+  | `money-${100 | 500 | 1000 | 5000 | 10000 | 50000}`
   | 'pot'
   | 'bed'
+  | 'farm'
   | 'veranda'
   | 'tank'
   | 'worker'

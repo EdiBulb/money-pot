@@ -1,39 +1,14 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { art } from '../art'
-import type { PlotKind } from '../game/config'
+import type { CSSProperties } from 'react'
 import type { Plot } from '../game/engine'
 import { PlantView } from './PlantView'
-import { BedBack, BedFront, BedMid, PotBack, PotFront } from './Pot'
+import { dryness, geometryOf, moundColor, soilClip } from './plotGeometry'
 
 export interface Gain {
   id: number
   value: number
   plot: number
   slot: number
-}
-
-interface Spot {
-  /** 가운데에서 옆으로(px), 흙에서 아래로(px), 기울기(deg), 겹치는 순서 */
-  x: number
-  down: number
-  tilt: number
-  z: number
-}
-
-/** 자리 배치. 화분은 부채꼴 한 줄, 텃밭은 뒷줄 5개와 그 사이사이 앞줄 4개. */
-const LAYOUT: Record<PlotKind, Spot[]> = {
-  pot: [
-    { x: -70, down: 0, tilt: -16, z: 2 },
-    { x: -36, down: 0, tilt: -8, z: 3 },
-    { x: 0, down: 0, tilt: 0, z: 4 },
-    { x: 36, down: 0, tilt: 8, z: 3 },
-    { x: 70, down: 0, tilt: 16, z: 2 },
-  ],
-  bed: [
-    ...[-116, -58, 0, 58, 116].map((x) => ({ x, down: 0, tilt: 0, z: 2 })),
-    ...[-87, -29, 29, 87].map((x) => ({ x, down: 20, tilt: 0, z: 4 })),
-  ],
-  farm: [], // 농장은 FarmView가 따로 그린다.
 }
 
 const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
@@ -45,64 +20,56 @@ interface Props {
   dropKey: number
   onHarvest: (slot: number) => void
   onSwipe: (direction: 1 | -1) => void
-  onLookDown: () => void
   onGainDone: (id: number) => void
 }
 
-export function PlotView({ plot, wet, gains, dropKey, onHarvest, onSwipe, onLookDown, onGainDone }: Props) {
-  const spots = LAYOUT[plot.kind]
-  const bed = plot.kind === 'bed'
-  // 넣어 둔 이미지가 있으면 그 한 장을 돈 앞에 놓는다. 돈은 그림 윗변 뒤에서 솟아 나온다.
-  const image = art(bed ? 'bed' : 'pot')
+/** 위에서 비스듬히 내려다본 화분이나 텃밭. 돈은 흙에 꽂혀 있고, 위로 당겨서 뽑는다. */
+export function PlotView({ plot, wet, gains, dropKey, onHarvest, onSwipe, onGainDone }: Props) {
+  const g = geometryOf(plot.kind)
 
   return (
-    <div className={`plot plot-${plot.kind}`}>
-      {!image && (bed ? <BedBack wet={wet} /> : <PotBack wet={wet} />)}
-      {!image && bed && <BedMid wet={wet} />}
+    <div
+      className={`plot plot-${plot.kind}`}
+      style={{ aspectRatio: g.aspect, '--soil': moundColor(dryness(wet)) } as CSSProperties}
+    >
+      <img className="plot-img" src={g.src} alt="" draggable={false} />
+      {/* 물이 마를수록 흙이 밝고 푸석해 보이게 덧칠한다. */}
+      <div className="dry" style={{ opacity: dryness(wet) * 0.6, ...soilClip(g.soil) }} aria-hidden="true" />
 
-      <div className="slots">
-        {spots.map((spot, i) => {
-          const p = plot.slots[i]
-          return (
-            <div
-              key={i}
-              className="stalk"
-              style={{
-                left: `calc(50% + ${spot.x}px)`,
-                bottom: -spot.down,
-                zIndex: spot.z,
-                transform: `translateX(-50%) rotate(${spot.tilt}deg)`,
-              }}
-            >
-              <AnimatePresence>
-                {p && (
-                  <PlantView
-                    key={p.id}
-                    plant={p}
-                    onHarvest={() => onHarvest(i)}
-                    onSwipe={onSwipe}
-                    onLookDown={onLookDown}
-                  />
-                )}
-              </AnimatePresence>
-            </div>
-          )
-        })}
+      {g.spots.map((spot, i) => {
+        const p = plot.slots[i]
+        const style: CSSProperties = {
+          left: `${spot.x * 100}%`,
+          top: `${spot.y * 100}%`,
+          width: `${g.money * spot.scale * 100}%`,
+          zIndex: Math.round(spot.y * 100),
+        }
+        return (
+          <div key={i} className="spot" style={style}>
+            <AnimatePresence>
+              {p && <PlantView key={p.id} plant={p} onHarvest={() => onHarvest(i)} onSwipe={onSwipe} />}
+            </AnimatePresence>
+            {p && <span className={`mound${p.stage <= 1 ? ' mound-coin' : ''}`} aria-hidden="true" />}
+          </div>
+        )
+      })}
 
-        {gains.map((g) => (
+      {gains.map((gain) => {
+        const spot = g.spots[gain.slot]
+        return (
           <motion.span
-            key={g.id}
+            key={gain.id}
             className="gain"
-            style={{ left: `calc(50% + ${spots[g.slot].x}px)` }}
-            initial={{ x: '-50%', y: 0, opacity: 0, scale: 0.7 }}
-            animate={{ x: '-50%', y: -90, opacity: [0, 1, 1, 0], scale: 1 }}
+            style={{ left: `${spot.x * 100}%`, top: `${spot.y * 100}%` }}
+            initial={{ x: '-50%', y: '-60%', opacity: 0, scale: 0.7 }}
+            animate={{ x: '-50%', y: '-260%', opacity: [0, 1, 1, 0], scale: 1 }}
             transition={{ duration: 1 }}
-            onAnimationComplete={() => onGainDone(g.id)}
+            onAnimationComplete={() => onGainDone(gain.id)}
           >
-            +{won(g.value)}
+            +{won(gain.value)}
           </motion.span>
-        ))}
-      </div>
+        )
+      })}
 
       {dropKey > 0 && (
         <div key={dropKey} className="drops" aria-hidden="true">
@@ -111,14 +78,11 @@ export function PlotView({ plot, wet, gains, dropKey, onHarvest, onSwipe, onLook
           ))}
         </div>
       )}
-
-      {image ? (
-        <img className="art art-front" src={image} alt="" draggable={false} />
-      ) : bed ? (
-        <BedFront wet={wet} />
-      ) : (
-        <PotFront wet={wet} />
-      )}
     </div>
   )
+}
+
+/** 상점에 쓰는 작은 사진 */
+export function PlotIcon({ kind }: { kind: Plot['kind'] }) {
+  return <img className="plot-icon" src={geometryOf(kind).src} alt="" draggable={false} />
 }

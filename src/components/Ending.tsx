@@ -20,6 +20,7 @@ const LOOKS = [
   { coin: false, w: 26, h: 54, fill: '#efc95c', edge: '#86600c', light: '#fbecb4' },
   { coin: false, w: 26, h: 54, fill: '#efc95c', edge: '#86600c', light: '#fbecb4' },
   { coin: false, w: 26, h: 54, fill: '#efc95c', edge: '#86600c', light: '#fbecb4' },
+  { coin: false, w: 25, h: 52, fill: '#8ec79b', edge: '#2d6b45', light: '#d6eedb' },
   { coin: false, w: 24, h: 50, fill: '#dd9f72', edge: '#8c4721', light: '#f5dcc6' },
   { coin: false, w: 23, h: 48, fill: '#86add9', edge: '#2c5a92', light: '#cfe1f3' },
   { coin: true, w: 18, h: 18, fill: '#d5d9dc', edge: '#767d81', light: '#ffffff' },

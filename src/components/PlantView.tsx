@@ -4,19 +4,16 @@ import { DENOMS, GROW_MS, MAX_STAGE, PULL_THRESHOLD, SWIPE_THRESHOLD } from '../
 import type { Plant } from '../game/engine'
 import { playTick, vibrate } from '../game/feedback'
 import { Money } from './Money'
-import { Leaves } from './Pot'
 
 interface Props {
   plant: Plant
   onHarvest: () => void
   /** 돈 위에서 옆으로 밀어도 화분이 넘어가게 한다. 1 = 다음, -1 = 이전 */
   onSwipe: (direction: 1 | -1) => void
-  /** 돈 위에서 아래로 밀면 위에서 내려다본다. */
-  onLookDown: () => void
 }
 
 /** 흙에 꽂힌 돈 하나. 위로 끌어올렸다 놓으면 뽑힌다. */
-export function PlantView({ plant, onHarvest, onSwipe, onLookDown }: Props) {
+export function PlantView({ plant, onHarvest, onSwipe }: Props) {
   const [armed, setArmed] = useState(false) // 놓으면 뽑힐 만큼 당겼는가
   const armedRef = useRef(false)
 
@@ -39,7 +36,6 @@ export function PlantView({ plant, onHarvest, onSwipe, onLookDown }: Props) {
     setArmed(false)
     if (pulled) onHarvest()
     else if (Math.abs(x) >= SWIPE_THRESHOLD && Math.abs(x) > Math.abs(y) * 1.2) onSwipe(x < 0 ? 1 : -1)
-    else if (y >= SWIPE_THRESHOLD && y > Math.abs(x) * 1.2) onLookDown()
   }
 
   const growth = plant.stage < MAX_STAGE ? plant.progress / GROW_MS[plant.stage] : 1
@@ -66,7 +62,6 @@ export function PlantView({ plant, onHarvest, onSwipe, onLookDown }: Props) {
       transition={{ type: 'spring', stiffness: 420, damping: 22 }}
       aria-label={`${value}원. 위로 당겨서 뽑기`}
     >
-      <Leaves stage={plant.stage} />
       <motion.div
         key={plant.stage}
         className="money"
@@ -74,8 +69,14 @@ export function PlantView({ plant, onHarvest, onSwipe, onLookDown }: Props) {
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 380, damping: 12 }}
       >
-        <div style={{ transform: `scale(${0.86 + 0.14 * growth})`, transformOrigin: '50% 100%' }}>
-          <Money stage={plant.stage} />
+        {/* 밑동이 흙에 조금 묻히도록 아래로 내린다. 동전은 작아서 덜 묻는다. */}
+        <div
+          style={{
+            transform: `translateY(${plant.stage <= 1 ? 4 : 14}%) scale(${0.86 + 0.14 * growth})`,
+            transformOrigin: '50% 100%',
+          }}
+        >
+          <Money stage={plant.stage} fluid />
         </div>
       </motion.div>
       {armed && <span className="hint">놓으면 뽑혀요</span>}

@@ -6,11 +6,11 @@ Built with React, TypeScript, Vite and Motion. No backend: progress is saved in 
 
 ## How it plays
 
-- **Plant, water, wait.** Money grows ₩100 → ₩500 → ₩1,000 → ₩5,000 → ₩50,000 in two minutes, but only while the soil is wet.
+- **Plant, water, wait.** Money grows ₩100 → ₩500 → ₩1,000 → ₩5,000 → ₩10,000 → ₩50,000 in two minutes, but only while the soil is wet.
 - **Pull to harvest.** Drag a note upwards and let go. Bigger notes sound and shake bigger.
 - **Expand.** Buy more pots (5 slots), garden beds (9) and farms (100). On a farm you sweep a finger across grown notes to cut them like rice.
 - **Automate.** Water tanks refill the soil; hired workers harvest, replant and water for a salary.
-- **Gestures.** Swipe sideways to move between plots, swipe down for a top-down view.
+- **Gestures.** Swipe sideways to move between plots.
 - **Idle.** Time away is credited up to 8 hours.
 
 ## Run it
@@ -30,7 +30,7 @@ src/
     engine.ts     pure game logic: no React, no DOM, no clock of its own
     feedback.ts   Web Audio sounds and vibration
     storage.ts    localStorage save/load
-  components/     React views (pot, bed, farm, top view, shop, vault, ending)
+  components/     React views (plots, farm, shop, vault, ending); plotGeometry.ts maps soil positions in each photo
   art/            drop-in artwork (see below)
   App.tsx         wires state, gestures and views together
 ```
@@ -39,20 +39,21 @@ src/
 
 ## Artwork
 
-All graphics are currently drawn in code as placeholders. To replace one, put an image with the matching name in `src/art/` and rebuild. No code changes are needed; anything missing keeps its placeholder.
+The plots and money are AI-generated photos, shot from above at about 60 degrees with light from the upper left, cut out onto transparent backgrounds and stored as WebP in `src/art/`. Anything missing falls back to a drawing in code.
 
-| File name | What it is | Shape |
+| File name | What it is | Status |
 | --- | --- | --- |
-| `money-100`, `money-500` | Coin, seen from the front | Square, transparent background |
-| `money-1000`, `money-5000`, `money-50000` | Banknote standing upright | Portrait 1:2, transparent background |
-| `pot` | Flower pot, seen from the side | 200:170, transparent; rim's top edge about 23% from the top |
-| `bed` | Wooden garden bed, seen from the side | 340:150, transparent; soil line about 28% from the top |
-| `veranda` | Background (sunny apartment veranda) | Any, cropped to fill and anchored to the bottom |
-| `tank`, `worker` | Shop pictures | Roughly square, transparent |
+| `pot` | Terracotta pot with flat soil | In use |
+| `farm` | Square wooden field plot | In use (also used for the garden bed) |
+| `bed` | Garden bed | Optional; the farm photo is used until one exists |
+| `money-1000`, `money-5000`, `money-10000`, `money-50000` | Banknote rolled into a cylinder, standing upright | In use |
+| `money-100`, `money-500` | Coin standing on its edge | Drawn in code for now |
+| `veranda` | Floor background | Drawn in code (concrete) for now |
+| `tank`, `worker` | Shop pictures | Drawn in code for now |
 
-Accepted formats: `.png`, `.webp`, `.jpg`, `.svg`. The pot and bed images sit in front of the money, so notes appear to rise from behind the top edge. The top-down view and the farm grid are still drawn in code.
+Replacing `pot`, `bed` or `farm` means re-measuring the soil area in `src/components/plotGeometry.ts`, since money is placed by fractions of the photo.
 
-Banknote artwork should evoke the colours of Korean won (blue ₩1,000, orange-brown ₩5,000, yellow ₩50,000) without copying real notes: no real portraits, serial numbers or security features.
+Banknote artwork follows the Bank of Korea's design-use rules: no portraits are drawn, and the portrait area is left as a plain oval.
 
 ## Deploy
 
