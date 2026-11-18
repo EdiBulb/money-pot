@@ -154,6 +154,65 @@ p {
   color: var(--pot-dark);
 }
 
+/* 앱 안의 브라우저 안내 */
+.inapp {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 10px 30px rgb(12 30 22 / 0.35);
+}
+
+.inapp-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.inapp-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.inapp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inapp-main {
+  flex: 1 1 100%;
+  height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--safe);
+  color: var(--gold);
+  font: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.inapp-sub {
+  flex: 1;
+  height: 38px;
+  border: 2px solid var(--wall-line);
+  border-radius: 10px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
 /* 작은 창: 다른 창 위에 떠 있는 '내 자산' */
 .pip-body {
   margin: 0;

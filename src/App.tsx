@@ -6,6 +6,7 @@ import { Ending } from './components/Ending'
 import { MiniVault } from './components/MiniVault'
 import { pipSupported, useMiniWindow } from './components/useMiniWindow'
 import { FarmView } from './components/FarmView'
+import { InAppNotice } from './components/InAppNotice'
 import { PlotIcon, PlotView, type Gain } from './components/PlotView'
 import { TankArt, WorkerIcon } from './components/ShopArt'
 import { Shop, type ShopItem } from './components/Shop'
@@ -476,6 +477,7 @@ export default function App({ initial, away, firstVisit }: Props) {
           여기서는 작은 창을 띄울 수 없어요. 크롬이나 엣지에서 게임 주소를 직접 열어 주세요.
         </p>
       )}
+      <InAppNotice />
       {mini.win && createPortal(<MiniVault amount={state.vault} goal={state.goal} />, mini.win.document.body)}
 
       <main
