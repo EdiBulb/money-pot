@@ -108,14 +108,6 @@ export const geometryOf = (kind: PlotKind) => GEOMETRY[kind]
  */
 export const dryness = (wet: number) => Math.max(0, Math.min(1, 1 - wet * 2))
 
-/** 돈 밑동을 덮는 흙의 색. 사진 속 젖은 흙색에서 마른 흙색으로 옮겨 간다. */
-export function moundColor(dry: number): string {
-  const wetSoil = [48, 37, 29]
-  const drySoil = [128, 103, 78]
-  const mix = wetSoil.map((c, i) => Math.round(c + (drySoil[i] - c) * dry * 0.6))
-  return `${mix[0]} ${mix[1]} ${mix[2]}`
-}
-
 /**
  * 흙 모양대로 자르는 CSS. 둥근 흙은 가장자리를 흐리게 풀어서 경계선이 보이지 않게 한다.
  */

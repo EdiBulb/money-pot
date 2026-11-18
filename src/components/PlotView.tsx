@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import type { CSSProperties } from 'react'
 import type { Plot } from '../game/engine'
 import { PlantView } from './PlantView'
-import { dryness, geometryOf, moundColor, soilClip } from './plotGeometry'
+import { dryness, geometryOf, soilClip } from './plotGeometry'
 
 export interface Gain {
   id: number
@@ -28,10 +28,7 @@ export function PlotView({ plot, wet, gains, dropKey, onHarvest, onSwipe, onGain
   const g = geometryOf(plot.kind)
 
   return (
-    <div
-      className={`plot plot-${plot.kind}`}
-      style={{ aspectRatio: g.aspect, '--soil': moundColor(dryness(wet)) } as CSSProperties}
-    >
+    <div className={`plot plot-${plot.kind}`} style={{ aspectRatio: g.aspect }}>
       <img className="plot-img" src={g.src} alt="" draggable={false} />
       {/* 물이 마를수록 흙이 밝고 푸석해 보이게 덧칠한다. */}
       <div className="dry" style={{ opacity: dryness(wet) * 0.6, ...soilClip(g.soil) }} aria-hidden="true" />
@@ -46,10 +43,11 @@ export function PlotView({ plot, wet, gains, dropKey, onHarvest, onSwipe, onGain
         }
         return (
           <div key={i} className="spot" style={style}>
+            {/* 돈이 흙에 닿는 자리의 그림자. 돈보다 먼저 그려서 뒤에 깔린다. */}
+            {p && <span className={`seat${p.stage <= 1 ? ' seat-coin' : ''}`} aria-hidden="true" />}
             <AnimatePresence>
               {p && <PlantView key={p.id} plant={p} onHarvest={() => onHarvest(i)} onSwipe={onSwipe} />}
             </AnimatePresence>
-            {p && <span className={`mound${p.stage <= 1 ? ' mound-coin' : ''}`} aria-hidden="true" />}
           </div>
         )
       })}

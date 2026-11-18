@@ -69,10 +69,10 @@ export function PlantView({ plant, onHarvest, onSwipe }: Props) {
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 380, damping: 12 }}
       >
-        {/* 밑동이 흙에 조금 묻히도록 아래로 내린다. 동전은 작아서 덜 묻는다. */}
+        {/* 밑동이 흙에 살짝 박히도록 조금 내린다. 동전은 작아서 덜 내린다. */}
         <div
           style={{
-            transform: `translateY(${plant.stage <= 1 ? 4 : 14}%) scale(${0.86 + 0.14 * growth})`,
+            transform: `translateY(${plant.stage <= 1 ? 2 : 5}%) scale(${0.86 + 0.14 * growth})`,
             transformOrigin: '50% 100%',
           }}
         >
